@@ -23,6 +23,7 @@ import { DefinitionProvider } from "./providers/definitionProvider";
 import { DiagnosticsProvider } from "./providers/diagnostics/diagnosticsProvider";
 import { ElmAnalyseDiagnostics } from "./providers/diagnostics/elmAnalyseDiagnostics";
 import { ElmMakeDiagnostics } from "./providers/diagnostics/elmMakeDiagnostics";
+import { ElmTestDiagnostics } from "./providers/diagnostics/elmTestDiagnostics";
 import { DocumentFormattingProvider } from "./providers/documentFormatingProvider";
 import { DocumentSymbolProvider } from "./providers/documentSymbolProvider";
 import { FoldingRangeProvider } from "./providers/foldingProvider";
@@ -263,6 +264,11 @@ export class Server implements ILanguageServer {
           elmWorkspace,
           settings,
         );
+        const elmTest = new ElmTestDiagnostics(
+          connection,
+          elmWorkspace,
+          settings,
+        );
         // tslint:disable:no-unused-expression
         new ASTProvider(connection, forest, documentEvents, imports, parser);
         new FoldingRangeProvider(connection, forest);
@@ -272,9 +278,9 @@ export class Server implements ILanguageServer {
           connection,
           elmWorkspace,
           textDocumentEvents,
-          settings,
           elmAnalyse,
           elmMake,
+          elmTest,
         );
         new DefinitionProvider(connection, forest, imports);
         new ReferencesProvider(connection, forest, imports);
@@ -282,7 +288,7 @@ export class Server implements ILanguageServer {
         new WorkspaceSymbolProvider(connection, forest);
         new CodeLensProvider(connection, forest, imports);
         new RenameProvider(connection, forest, imports);
-        new CodeActionProvider(connection, elmAnalyse, elmMake);
+        new CodeActionProvider(connection, elmAnalyse, elmMake, elmTest);
       }
     });
   }

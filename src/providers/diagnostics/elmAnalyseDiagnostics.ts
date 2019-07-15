@@ -5,6 +5,8 @@ import * as fs from "fs";
 import * as path from "path";
 import util from "util";
 import {
+  ApplyWorkspaceEditParams,
+  ApplyWorkspaceEditResponse,
   CodeAction,
   CodeActionKind,
   CodeActionParams,
@@ -35,6 +37,7 @@ const fixableErrors = [
 ];
 const ELM_ANALYSE = "elm-analyse";
 const RANDOM_ID = crypto.randomBytes(16).toString("hex");
+export const ELM_ANALYSE_MATCHER = `elmLS.elmAnalyse`;
 export const CODE_ACTION_ELM_ANALYSE = `elmLS.elmAnalyseFixer-${RANDOM_ID}`;
 export const CODE_ACTION_ELM_ANALYSE_FIX_ALL = `elmLS.elmAnalyseFixer.fixAll-${RANDOM_ID}`;
 
@@ -128,7 +131,9 @@ export class ElmAnalyseDiagnostics extends EventEmitter {
       : [];
   }
 
-  public async onExecuteCommand(params: ExecuteCommandParams) {
+  public async onExecuteCommand(
+    params: ExecuteCommandParams,
+  ): Promise<ApplyWorkspaceEditResponse | undefined> {
     let uri: URI;
     switch (params.command) {
       case CODE_ACTION_ELM_ANALYSE:

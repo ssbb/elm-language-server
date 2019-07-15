@@ -37,9 +37,9 @@ export class DiagnosticsProvider {
     connection: IConnection,
     private elmWorkspaceFolder: URI,
     events: TextDocumentEvents,
-    settings: Settings,
     elmAnalyse: ElmAnalyseDiagnostics,
     elmMake: ElmMakeDiagnostics,
+    elmTest: ElmTestDiagnostics,
   ) {
     this.getDiagnosticsOnSaveOrOpen = this.getDiagnosticsOnSaveOrOpen.bind(
       this,
@@ -49,13 +49,9 @@ export class DiagnosticsProvider {
     this.events = events;
     this.elmMakeDiagnostics = elmMake;
     this.elmAnalyseDiagnostics = elmAnalyse;
+    this.elmTestDiagnostics = elmTest;
 
     this.connection = connection;
-    this.elmTestDiagnostics = new ElmTestDiagnostics(
-      connection,
-      elmWorkspaceFolder,
-      settings,
-    );
 
     this.currentDiagnostics = {
       elmAnalyse: new Map(),

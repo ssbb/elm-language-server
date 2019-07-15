@@ -1,25 +1,27 @@
 import {
+  ApplyWorkspaceEditResponse,
   CodeAction,
   CodeActionParams,
   ExecuteCommandParams,
   IConnection,
 } from "vscode-languageserver";
-import { ElmAnalyseDiagnostics } from "./diagnostics/elmAnalyseDiagnostics";
+import { URI } from "vscode-uri";
+import {
+  ELM_ANALYSE_MATCHER,
+  ElmAnalyseDiagnostics,
+} from "./diagnostics/elmAnalyseDiagnostics";
 import { ElmMakeDiagnostics } from "./diagnostics/elmMakeDiagnostics";
+import { ElmTestDiagnostics } from "./diagnostics/elmTestDiagnostics";
+export const COMMAND_RUN_TESTS_CURRENT_FILE = `elmLS.runTestsCurrentFile`;
+export const COMMAND_RUN_TESTS = `elmLS.runTests`;
 
 export class CodeActionProvider {
-  private connection: IConnection;
-  private elmAnalyse: ElmAnalyseDiagnostics;
-  private elmMake: ElmMakeDiagnostics;
-
   constructor(
-    connection: IConnection,
-    elmAnalyse: ElmAnalyseDiagnostics,
-    elmMake: ElmMakeDiagnostics,
+    private connection: IConnection,
+    private elmAnalyse: ElmAnalyseDiagnostics,
+    private elmMake: ElmMakeDiagnostics,
+    private elmTest: ElmTestDiagnostics,
   ) {
-    this.connection = connection;
-    this.elmAnalyse = elmAnalyse;
-    this.elmMake = elmMake;
     this.onCodeAction = this.onCodeAction.bind(this);
     this.onExecuteCommand = this.onExecuteCommand.bind(this);
     this.connection.onCodeAction(this.onCodeAction);
@@ -35,6 +37,22 @@ export class CodeActionProvider {
 
   private async onExecuteCommand(params: ExecuteCommandParams) {
     this.connection.console.info("A command execution was requested");
-    return this.elmAnalyse.onExecuteCommand(params);
+
+    if (params.command.startsWith(ELM_ANALYSE_MATCHER)) {
+      return this.elmAnalyse.onExecuteCommand(params);
+    } else {
+      return this.onExecuteTestCommand(params);
+    }
+  }
+
+  private async onExecuteTestCommand(
+    params: ExecuteCommandParams,
+  ): Promise<ApplyWorkspaceEditResponse | undefined> {
+    switch (params.command) {
+      case COMMAND_RUN_TESTS:
+        return;
+      case COMMAND_RUN_TESTS_CURRENT_FILE:
+        return;
+    }
   }
 }
