@@ -43,7 +43,7 @@ export class DocumentFormattingProvider {
     }
   };
 
-  protected handleFormattingRequest = async (
+  private handleFormattingRequest = async (
     params: DocumentFormattingParams,
   ) => {
     this.connection.console.info(`Formatting was requested`);
