@@ -5,6 +5,7 @@ import {
   DidCloseTextDocumentParams,
   DidOpenTextDocumentParams,
   DidSaveTextDocumentParams,
+  FileChangeType,
 } from "vscode-languageserver";
 import { URI } from "vscode-uri";
 
@@ -23,7 +24,6 @@ export interface IDocumentEvents {
 export class DocumentEvents extends EventEmitter implements IDocumentEvents {
   constructor(private connection: Connection, elmWorkspace: URI) {
     super();
-
     connection.onDidChangeTextDocument(event =>
       this.emitForWorkspace(event, elmWorkspace, "change"),
     );
@@ -36,6 +36,13 @@ export class DocumentEvents extends EventEmitter implements IDocumentEvents {
     connection.onDidSaveTextDocument(event =>
       this.emitForWorkspace(event, elmWorkspace, "save"),
     );
+    connection.onDidChangeWatchedFiles(event => {
+      const newDeleteEvents = event.changes.filter(
+        a => a.type === FileChangeType.Deleted,
+      );
+      console.log("test");
+      this.emitForWorkspace(newDeleteEvents, elmWorkspace, "deleted");
+    });
   }
 
   private emitForWorkspace(
